@@ -80,6 +80,7 @@ export class SettingsPanel {
             <label><input id="pf-subfolders" type="checkbox" ${d.includeSubfolders ? 'checked' : ''}/> Include subfolders</label>
             <label><input id="pf-date" type="checkbox" ${d.showDate ? 'checked' : ''}/> Show date on photos</label>
             <label><input id="pf-sound" type="checkbox" ${d.videoSound ? 'checked' : ''}/> Play video sound</label>
+            <label><input id="pf-resume" type="checkbox" ${d.resumeLastShown ? 'checked' : ''}/> Start from the last shown photo</label>
           </div>
         </div>
         <div class="actions">
@@ -115,7 +116,8 @@ export class SettingsPanel {
         sortOrder: $<HTMLSelectElement>('pf-order').value as Settings['sortOrder'],
         includeSubfolders: $<HTMLInputElement>('pf-subfolders').checked,
         showDate: $<HTMLInputElement>('pf-date').checked,
-        videoSound: $<HTMLInputElement>('pf-sound').checked
+        videoSound: $<HTMLInputElement>('pf-sound').checked,
+        resumeLastShown: $<HTMLInputElement>('pf-resume').checked
       }
       const prev = this.current as Settings
       this.close()

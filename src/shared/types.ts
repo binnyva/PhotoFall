@@ -12,6 +12,8 @@ export interface Settings {
   sortOrder: SortOrder
   showDate: boolean
   videoSound: boolean
+  /** On launch, continue from the last shown photo instead of the first one. */
+  resumeLastShown: boolean
 }
 
 /** What the renderer knows about one file. The real path stays in the main process. */

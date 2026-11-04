@@ -43,7 +43,7 @@ export async function buildPlaylist(settings: Settings, rescan = false): Promise
   if (rescan) lastKey = ''
   try {
     const items = sortItems(await load(settings), settings.sortBy, settings.sortOrder)
-    const last = getState().lastShown
+    const last = settings.resumeLastShown ? getState().lastShown : undefined
     const idx = last ? items.findIndex((m) => registry.get(m.id)?.path === last) : -1
     return {
       folder: settings.sourceFolder,

@@ -38,10 +38,11 @@ Saved to `~/Library/Application Support/PhotoFall/settings.json`.
 - **Delay** between photos, in seconds.
 - **Sort by**: date taken (EXIF, or the QuickTime creation time for videos, falling back to the file's created date), file created date, file name (natural order: IMG_2 before IMG_10), or random (reshuffled each loop). **Order** flips oldest/newest first.
 - **Show date on photos** and **Play video sound** (off by default).
+- **Start from the last shown photo** (on by default). Turn it off to always start from the first photo.
 
 ## Picking up where you left off
 
-PhotoFall remembers the last photo or video that fell (in `~/Library/Application Support/PhotoFall/state.json`). Next time it opens on the same folder, it lays the 10 photos before that one onto the table straight away, then drops the remembered photo on top and carries on from there.
+PhotoFall remembers the last photo or video that fell (in `~/Library/Application Support/PhotoFall/state.json`). With **Start from the last shown photo** on (the default), next time it opens on the same folder it lays the 10 photos before that one onto the table straight away, then drops the remembered photo on top and carries on from there.
 
 ## Layout
 

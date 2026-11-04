@@ -14,7 +14,8 @@ export function defaultSettings(): Settings {
     sortBy: 'exifDate',
     sortOrder: 'asc',
     showDate: true,
-    videoSound: false
+    videoSound: false,
+    resumeLastShown: true
   }
 }
 
@@ -30,6 +31,7 @@ export function sanitize(input: Partial<Settings>, base: Settings): Settings {
   if (ORDERS.includes(input.sortOrder as SortOrder)) out.sortOrder = input.sortOrder as SortOrder
   if (typeof input.showDate === 'boolean') out.showDate = input.showDate
   if (typeof input.videoSound === 'boolean') out.videoSound = input.videoSound
+  if (typeof input.resumeLastShown === 'boolean') out.resumeLastShown = input.resumeLastShown
   return out
 }
 
