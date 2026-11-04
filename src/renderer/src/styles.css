@@ -44,10 +44,11 @@ body.hide-cursor * {
     0 1px 3px rgba(0, 0, 0, 0.35);
 }
 
-/* Each card keeps one stable GPU layer for its whole life: border, photo and caption are drawn
-   together, and nothing is re-layered when a card lands or a new one falls on top. */
-.card {
-  will-change: transform;
+/* Only the card in the air gets its own GPU layer. Resting cards are painted flat into the
+   page, so a 5K screen with 20 large cards doesn't exhaust GPU tile memory (which shows up as
+   blank or half-drawn cards). */
+.card.falling {
+  will-change: transform, opacity;
 }
 
 .card .lift-shadow {

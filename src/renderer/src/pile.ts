@@ -89,7 +89,9 @@ export class Pile {
     // animates transform and opacity, which the GPU handles without repainting the card.
     const lift = document.createElement('div')
     lift.className = 'lift-shadow'
+    lift.style.opacity = '0' // the animation below shows it; it stays hidden once the fall ends
     el.appendChild(lift)
+    el.classList.add('falling')
 
     const timing = { duration: 950, easing: 'cubic-bezier(0.45, 0, 0.75, 0.6)' }
     const card = el.animate(
@@ -102,14 +104,14 @@ export class Pile {
       ],
       timing
     )
-    lift.animate([{ opacity: 1 }, { opacity: 0, offset: 0.78 }, { opacity: 0 }], { ...timing, fill: 'forwards' })
+    lift.animate([{ opacity: 1 }, { opacity: 0, offset: 0.78 }, { opacity: 0 }], timing)
 
-    // Nothing about the card's layers changes when it lands (the faded shadow stays, invisible),
-    // so the GPU never has to re-draw a card that is already on screen.
-    return card.finished.then(
-      () => undefined,
-      () => undefined
-    )
+    // On landing, drop the layer and the shadow in the same frame so the card is re-drawn once.
+    const done = (): void => {
+      lift.remove()
+      el.classList.remove('falling')
+    }
+    return card.finished.then(done, done)
   }
 
   /** Pauses videos that are now mostly hidden under newer cards. */

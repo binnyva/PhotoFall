@@ -80,6 +80,9 @@ async function loadVideo(item: MediaItem): Promise<LoadedMedia> {
   video.playsInline = true
   video.loop = false
   video.muted = true
+  // Needed so a finished video's last frame can be captured into a still (else the canvas is
+  // "tainted" and the video has to stay on the page, where it forces extra GPU layers).
+  video.crossOrigin = 'anonymous'
   await new Promise<void>((resolve, reject) => {
     video.addEventListener('loadeddata', () => resolve(), { once: true })
     video.addEventListener('error', () => reject(new Error(`Can't play ${item.name}`)), { once: true })
@@ -120,8 +123,9 @@ export async function freezeVideo(video: HTMLVideoElement): Promise<void> {
     img.style.cssText = video.style.cssText
     if (video.isConnected) video.replaceWith(img)
     else releaseImage(img)
-  } catch {
+  } catch (err) {
     // Keep the paused video if the frame can't be captured.
+    console.warn('Could not freeze video', err)
     return
   }
   releaseVideo(video)

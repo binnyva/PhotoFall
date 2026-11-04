@@ -6,6 +6,9 @@ import { handleScheme, registerScheme } from './protocol'
 import { loadSettings, sanitize, saveSettings } from './settings'
 
 registerScheme()
+// Give the compositor more GPU memory for tiles. Large Retina/5K screens with a pile of big
+// photos can run past Chromium's default budget, which shows as blank parts of cards.
+app.commandLine.appendSwitch('force-gpu-mem-available-mb', '2048')
 
 let win: BrowserWindow | null = null
 let settings: Settings
