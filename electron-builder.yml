@@ -1,0 +1,16 @@
+appId: com.binnyva.photofall
+productName: PhotoFall
+directories:
+  buildResources: resources
+files:
+  - out/**
+  - package.json
+mac:
+  category: public.app-category.photography
+  target:
+    - target: dmg
+      arch: universal
+  extendInfo:
+    NSPhotoLibraryUsageDescription: PhotoFall shows photos from the folder you choose.
+dmg:
+  artifactName: PhotoFall-${version}.dmg

@@ -1,0 +1,214 @@
+:root {
+  --table-center: #3a3027;
+  --table-edge: #100d0a;
+  --paper: #fbfaf6;
+  --ink: #3a3631;
+  --ui-bg: rgba(24, 20, 17, 0.94);
+  --ui-fg: #f2ede6;
+  --ui-muted: #a89f94;
+  --ui-accent: #e8b45a;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: radial-gradient(ellipse at 50% 45%, var(--table-center) 0%, var(--table-edge) 85%);
+  color: var(--ui-fg);
+  font: 15px/1.4 -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+  user-select: none;
+}
+
+body.hide-cursor,
+body.hide-cursor * {
+  cursor: none !important;
+}
+
+#table {
+  position: absolute;
+  inset: 0;
+}
+
+/* A Polaroid: even white border on three sides, a deeper strip at the bottom for the caption */
+.card {
+  position: absolute;
+  background: var(--paper);
+  border-radius: 2px;
+  box-shadow:
+    0 6px 14px rgba(0, 0, 0, 0.45),
+    0 1px 3px rgba(0, 0, 0, 0.35);
+  will-change: transform;
+}
+
+.card .photo {
+  display: block;
+  object-fit: cover;
+  background: #1d1a17;
+}
+
+.card .caption {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink);
+  font-family: 'Noteworthy', 'Bradley Hand', 'Marker Felt', 'Segoe Print', cursive;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+body.no-date .card .caption {
+  visibility: hidden;
+}
+
+#notice {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  text-align: center;
+  font-size: 20px;
+  color: var(--ui-muted);
+  padding: 24px;
+}
+
+#notice[hidden],
+#paused[hidden] {
+  display: none;
+}
+
+#notice strong {
+  color: var(--ui-fg);
+  font-weight: 600;
+}
+
+#paused {
+  position: absolute;
+  top: 24px;
+  right: 28px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: var(--ui-bg);
+  color: var(--ui-fg);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+}
+
+button {
+  font: inherit;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--ui-fg);
+  padding: 8px 16px;
+  cursor: pointer;
+}
+
+button.primary {
+  background: var(--ui-accent);
+  border-color: var(--ui-accent);
+  color: #1a140c;
+  font-weight: 600;
+}
+
+/* Settings panel */
+dialog#settings {
+  width: min(460px, calc(100vw - 32px));
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  background: var(--ui-bg);
+  color: var(--ui-fg);
+  padding: 24px 26px 20px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+}
+
+dialog#settings::backdrop {
+  background: rgba(0, 0, 0, 0.45);
+}
+
+dialog h2 {
+  margin: 0 0 18px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.field {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.field > span {
+  color: var(--ui-muted);
+}
+
+.field input[type='number'],
+.field select {
+  font: inherit;
+  width: 100%;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--ui-fg);
+}
+
+.field select option {
+  background: #231e19;
+}
+
+.folder {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  min-width: 0;
+}
+
+.folder code {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  direction: rtl;
+  text-align: left;
+  font-size: 13px;
+  color: var(--ui-fg);
+}
+
+.checks label {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.actions .keys {
+  font-size: 12px;
+  color: var(--ui-muted);
+}
+
+.actions .buttons {
+  display: flex;
+  gap: 8px;
+}
