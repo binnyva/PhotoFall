@@ -1,6 +1,6 @@
 import { coveredByAny, fitSize, placeCard, type CardRect } from '@shared/placement'
 import { PILE_LIMIT, type MediaItem } from '@shared/types'
-import { releaseVideo, type LoadedMedia } from './media'
+import { freezeVideo, paintPhoto, releaseVideo, type LoadedMedia } from './media'
 
 interface Card {
   el: HTMLDivElement
@@ -55,6 +55,7 @@ export class Pile {
     m.style.width = `${photo.w * s}px`
     m.style.height = `${photo.h * s}px`
     el.appendChild(m)
+    if (media.bitmap) paintPhoto(media, photo.w * s, photo.h * s)
 
     const caption = document.createElement('div')
     caption.className = 'caption'
@@ -65,7 +66,10 @@ export class Pile {
 
     this.table.appendChild(el)
     const video = m instanceof HTMLVideoElement ? m : null
-    this.cards.push({ el, rect, item: media.item, video })
+    const card: Card = { el, rect, item: media.item, video }
+    this.cards.push(card)
+    // A video plays once; when it ends, keep a still of its last frame and free the decoder.
+    video?.addEventListener('ended', () => this.freeze(card), { once: true })
 
     const landed = this.animateFall(el, rect).then(() => this.afterLanding())
     this.trim()
@@ -108,8 +112,14 @@ export class Pile {
     this.cards.forEach((c, i) => {
       if (!c.video || c.video.paused || c.video.ended) return
       const above = this.cards.slice(i + 1).map((x) => x.rect)
-      if (coveredByAny(c.rect, above) > 0.6) c.video.pause()
+      if (coveredByAny(c.rect, above) > 0.6) this.freeze(c)
     })
+  }
+
+  private freeze(card: Card): void {
+    if (!card.video) return
+    freezeVideo(card.video)
+    card.video = null
   }
 
   /** Keeps the DOM small: removes the oldest cards beyond the pile limit. */

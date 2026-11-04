@@ -14,10 +14,13 @@ const MIME: Record<string, string> = {
   '.mp4': 'video/mp4', '.m4v': 'video/mp4', '.mov': 'video/quicktime', '.webm': 'video/webm'
 }
 
+/** The page loads from file:// (or the dev server), so media responses must allow that origin. */
+const CORS = { 'Access-Control-Allow-Origin': '*' }
+
 /** Must run before app `ready`. */
 export function registerScheme(): void {
   protocol.registerSchemesAsPrivileged([
-    { scheme: SCHEME, privileges: { standard: true, secure: true, stream: true, supportFetchAPI: true } }
+    { scheme: SCHEME, privileges: { standard: true, secure: true, stream: true, supportFetchAPI: true, corsEnabled: true } }
   ])
 }
 
@@ -41,14 +44,15 @@ async function serveFile(path: string, request: Request): Promise<Response> {
         'Content-Type': type,
         'Content-Length': String(end - start + 1),
         'Content-Range': `bytes ${start}-${end}/${size}`,
-        'Accept-Ranges': 'bytes'
+        'Accept-Ranges': 'bytes',
+        ...CORS
       }
     })
   }
   const body = Readable.toWeb(createReadStream(path)) as ReadableStream
   return new Response(body, {
     status: 200,
-    headers: { 'Content-Type': type, 'Content-Length': String(size), 'Accept-Ranges': 'bytes' }
+    headers: { 'Content-Type': type, 'Content-Length': String(size), 'Accept-Ranges': 'bytes', ...CORS }
   })
 }
 

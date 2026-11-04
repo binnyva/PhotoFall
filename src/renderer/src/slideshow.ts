@@ -1,5 +1,5 @@
 import { VIDEO_HOLD_SECONDS, type MediaItem, type Playlist, type Settings } from '@shared/types'
-import { loadMedia, releaseVideo, type LoadedMedia } from './media'
+import { loadMedia, releaseMedia, type LoadedMedia } from './media'
 import { Pile } from './pile'
 import { PausableTimer } from './timer'
 
@@ -119,7 +119,7 @@ export class Slideshow {
   private dropPrefetch(): void {
     const old = this.prefetch
     this.prefetch = null
-    old?.p.then((m) => m.el instanceof HTMLVideoElement && releaseVideo(m.el)).catch(() => undefined)
+    old?.p.then(releaseMedia).catch(() => undefined)
   }
 
   private async step(): Promise<void> {

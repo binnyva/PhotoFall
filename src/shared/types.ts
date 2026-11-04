@@ -35,4 +35,5 @@ export interface Playlist {
 }
 
 export const VIDEO_HOLD_SECONDS = 3
-export const PILE_LIMIT = 25
+/** Cards kept on the table. Older ones are removed from the page and freed. */
+export const PILE_LIMIT = 20
