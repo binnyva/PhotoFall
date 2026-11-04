@@ -42,7 +42,22 @@ body.hide-cursor * {
   box-shadow:
     0 6px 14px rgba(0, 0, 0, 0.45),
     0 1px 3px rgba(0, 0, 0, 0.35);
-  will-change: transform;
+}
+
+/* Only the card in the air gets its own GPU layer; resting cards are flattened together. */
+.card.falling {
+  will-change: transform, opacity;
+}
+
+.card .lift-shadow {
+  position: absolute;
+  inset: 0;
+  border-radius: 2px;
+  box-shadow:
+    0 70px 90px rgba(0, 0, 0, 0.25),
+    0 30px 40px rgba(0, 0, 0, 0.15);
+  pointer-events: none;
+  z-index: -1;
 }
 
 .card .photo {

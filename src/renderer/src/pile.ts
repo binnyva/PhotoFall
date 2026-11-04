@@ -71,8 +71,12 @@ export class Pile {
     // A video plays once; when it ends, keep a still of its last frame and free the decoder.
     video?.addEventListener('ended', () => this.freeze(card), { once: true })
 
-    const landed = this.animateFall(el, rect).then(() => this.afterLanding())
-    this.trim()
+    // Old cards are removed only after the new one lands: changing the stack mid-fall
+    // makes the compositor rebuild its layers, which shows up as flicker.
+    const landed = this.animateFall(el, rect).then(() => {
+      this.afterLanding()
+      this.trim()
+    })
     return { card: el, landed }
   }
 
@@ -81,30 +85,32 @@ export class Pile {
     const spin = (Math.random() < 0.5 ? -1 : 1) * (8 + Math.random() * 10)
     const driftX = (Math.random() - 0.5) * 80
     const final = `rotate(${rect.angle}deg)`
-    const anim = el.animate(
+
+    // The deep "held above the table" shadow is its own layer that fades out, so the fall only
+    // animates transform and opacity, which the GPU handles without repainting the card.
+    const lift = document.createElement('div')
+    lift.className = 'lift-shadow'
+    el.appendChild(lift)
+    el.classList.add('falling')
+
+    const timing = { duration: 950, easing: 'cubic-bezier(0.45, 0, 0.75, 0.6)' }
+    const card = el.animate(
       [
-        {
-          transform: `translate(${driftX}px, -70px) rotate(${rect.angle + spin}deg) scale(1.32)`,
-          opacity: 0,
-          boxShadow: '0 70px 90px rgba(0,0,0,0.25), 0 30px 40px rgba(0,0,0,0.15)',
-          offset: 0
-        },
+        { transform: `translate(${driftX}px, -70px) rotate(${rect.angle + spin}deg) scale(1.32)`, opacity: 0, offset: 0 },
         { opacity: 1, offset: 0.12 },
-        {
-          transform: `${final} scale(0.975)`,
-          boxShadow: '0 3px 6px rgba(0,0,0,0.55), 0 1px 2px rgba(0,0,0,0.4)',
-          offset: 0.78,
-          easing: 'ease-out'
-        },
+        { transform: `${final} scale(0.975)`, offset: 0.78, easing: 'ease-out' },
         { transform: `${final} scale(1.006)`, offset: 0.9 },
-        { transform: `${final} scale(1)`, boxShadow: '0 6px 14px rgba(0,0,0,0.45), 0 1px 3px rgba(0,0,0,0.35)' }
+        { transform: `${final} scale(1)` }
       ],
-      { duration: 950, easing: 'cubic-bezier(0.45, 0, 0.75, 0.6)' }
+      timing
     )
-    return anim.finished.then(
-      () => undefined,
-      () => undefined
-    )
+    lift.animate([{ opacity: 1 }, { opacity: 0, offset: 0.78 }, { opacity: 0 }], { ...timing, fill: 'forwards' })
+
+    const done = (): void => {
+      lift.remove()
+      el.classList.remove('falling')
+    }
+    return card.finished.then(done, done)
   }
 
   /** Pauses videos that are now mostly hidden under newer cards. */
