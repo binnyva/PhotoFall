@@ -44,9 +44,10 @@ body.hide-cursor * {
     0 1px 3px rgba(0, 0, 0, 0.35);
 }
 
-/* Only the card in the air gets its own GPU layer; resting cards are flattened together. */
-.card.falling {
-  will-change: transform, opacity;
+/* Each card keeps one stable GPU layer for its whole life: border, photo and caption are drawn
+   together, and nothing is re-layered when a card lands or a new one falls on top. */
+.card {
+  will-change: transform;
 }
 
 .card .lift-shadow {

@@ -1,6 +1,6 @@
-import { coveredByAny, fitSize, placeCard, type CardRect } from '@shared/placement'
+import { coveredByAny, placeCard, type CardRect } from '@shared/placement'
 import { PILE_LIMIT, type MediaItem } from '@shared/types'
-import { freezeVideo, paintPhoto, releaseVideo, type LoadedMedia } from './media'
+import { freezeVideo, photoSize, releaseImage, releaseVideo, type LoadedMedia } from './media'
 
 interface Card {
   el: HTMLDivElement
@@ -26,7 +26,7 @@ export class Pile {
   drop(media: LoadedMedia): { card: HTMLDivElement; landed: Promise<void> } {
     const W = window.innerWidth
     const H = window.innerHeight
-    const photo = fitSize(media.aspect, W * 0.4, H * 0.44)
+    const photo = photoSize(media.aspect)
     // Polaroid proportions: side borders about 5% of the photo width, a deeper strip at the bottom
     const side = Math.round(Math.max(10, photo.w * 0.05))
     const strip = Math.round(Math.max(36, photo.h * 0.16))
@@ -55,7 +55,6 @@ export class Pile {
     m.style.width = `${photo.w * s}px`
     m.style.height = `${photo.h * s}px`
     el.appendChild(m)
-    if (media.bitmap) paintPhoto(media, photo.w * s, photo.h * s)
 
     const caption = document.createElement('div')
     caption.className = 'caption'
@@ -91,7 +90,6 @@ export class Pile {
     const lift = document.createElement('div')
     lift.className = 'lift-shadow'
     el.appendChild(lift)
-    el.classList.add('falling')
 
     const timing = { duration: 950, easing: 'cubic-bezier(0.45, 0, 0.75, 0.6)' }
     const card = el.animate(
@@ -106,11 +104,12 @@ export class Pile {
     )
     lift.animate([{ opacity: 1 }, { opacity: 0, offset: 0.78 }, { opacity: 0 }], { ...timing, fill: 'forwards' })
 
-    const done = (): void => {
-      lift.remove()
-      el.classList.remove('falling')
-    }
-    return card.finished.then(done, done)
+    // Nothing about the card's layers changes when it lands (the faded shadow stays, invisible),
+    // so the GPU never has to re-draw a card that is already on screen.
+    return card.finished.then(
+      () => undefined,
+      () => undefined
+    )
   }
 
   /** Pauses videos that are now mostly hidden under newer cards. */
@@ -124,8 +123,14 @@ export class Pile {
 
   private freeze(card: Card): void {
     if (!card.video) return
-    freezeVideo(card.video)
+    void freezeVideo(card.video)
     card.video = null
+  }
+
+  private release(card: Card): void {
+    if (card.video) releaseVideo(card.video)
+    card.el.querySelectorAll('img').forEach(releaseImage)
+    card.el.remove()
   }
 
   /** Keeps the DOM small: removes the oldest cards beyond the pile limit. */
@@ -133,8 +138,7 @@ export class Pile {
     while (this.cards.length > PILE_LIMIT) {
       const old = this.cards.shift()
       if (!old) break
-      if (old.video) releaseVideo(old.video)
-      old.el.remove()
+      this.release(old)
     }
   }
 
@@ -144,8 +148,7 @@ export class Pile {
 
   clear(): void {
     for (const c of this.cards) {
-      if (c.video) releaseVideo(c.video)
-      c.el.remove()
+      this.release(c)
     }
     this.cards = []
   }
