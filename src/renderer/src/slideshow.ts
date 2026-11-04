@@ -1,5 +1,6 @@
-import { VIDEO_HOLD_SECONDS, type MediaItem, type Playlist, type Settings } from '@shared/types'
+import { RESUME_PILE, VIDEO_HOLD_SECONDS, type MediaItem, type Playlist, type Settings } from '@shared/types'
 import { loadMedia, releaseMedia, type LoadedMedia } from './media'
+import { mapLimit } from './util'
 import { Pile } from './pile'
 import { PausableTimer } from './timer'
 
@@ -54,8 +55,38 @@ export class Slideshow {
       this.events.onNotice(`No photos or videos in <strong>${escapeHtml(playlist.folder)}</strong>`)
       return
     }
+    // Pick up where the last run stopped: the photo shown last falls first.
+    if (playlist.resumeIndex !== undefined) {
+      if (this.pile.size === 0) {
+        // Fresh table (app launch): re-show the last photo on top of the 10 before it.
+        this.index = playlist.resumeIndex
+        await this.layResumePile(gen)
+      } else {
+        // Re-sorted mid-show: carry on with the photo after the current one.
+        this.index = playlist.resumeIndex + 1
+      }
+      if (gen !== this.generation) return
+    }
     this.events.onNotice(null)
     void this.step()
+  }
+
+  /** Lays the photos that came before the resume point onto the table at once, oldest first. */
+  private async layResumePile(gen: number): Promise<void> {
+    const items = this.playlist.items
+    const count = Math.min(RESUME_PILE, items.length - 1)
+    if (count <= 0) return
+    const before: MediaItem[] = []
+    for (let k = count; k >= 1; k--) before.push(items[(this.index - k + items.length) % items.length])
+    const loaded = await mapLimit(before, 3, (item) => loadMedia(item).catch(() => null))
+    for (const media of loaded) {
+      if (!media) continue
+      if (gen !== this.generation) {
+        releaseMedia(media)
+        continue
+      }
+      this.pile.drop(media, false)
+    }
   }
 
   togglePause(): void {
@@ -151,6 +182,7 @@ export class Slideshow {
         })
       }
       const { landed } = this.pile.drop(media)
+      window.photofall.reportShown(media.item.id)
       this.queuePrefetch()
       await landed
       if (gen !== this.generation) return

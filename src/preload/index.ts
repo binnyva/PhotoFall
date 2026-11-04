@@ -13,6 +13,7 @@ const api: PhotoFallApi = {
   getPlaylist: (rescan) => ipcRenderer.invoke('playlist:get', rescan),
   chooseFolder: () => ipcRenderer.invoke('folder:choose'),
   exitFullscreen: () => ipcRenderer.invoke('window:exit-fullscreen'),
+  reportShown: (id) => ipcRenderer.send('state:shown', id),
   onOpenSettings: on('menu:settings'),
   onTogglePause: on('menu:toggle-pause'),
   onNext: on('menu:next'),

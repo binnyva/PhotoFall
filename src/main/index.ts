@@ -1,9 +1,10 @@
 import { app, BrowserWindow, dialog, ipcMain, Menu, powerSaveBlocker, shell } from 'electron'
 import { join } from 'node:path'
 import type { Settings } from '@shared/types'
-import { buildPlaylist } from './library'
+import { buildPlaylist, lookup } from './library'
 import { handleScheme, registerScheme } from './protocol'
 import { loadSettings, sanitize, saveSettings } from './settings'
+import { flushState, setLastShown } from './state'
 
 registerScheme()
 // Give the compositor more GPU memory for tiles. Large Retina/5K screens with a pile of big
@@ -94,6 +95,10 @@ function registerIpc(): void {
     const res = win ? await dialog.showOpenDialog(win, opts) : await dialog.showOpenDialog(opts)
     return res.canceled ? null : (res.filePaths[0] ?? null)
   })
+  ipcMain.on('state:shown', (_e, id: unknown) => {
+    const entry = typeof id === 'string' ? lookup(id) : undefined
+    if (entry) setLastShown(entry.path)
+  })
   ipcMain.handle('window:exit-fullscreen', () => {
     if (win?.isFullScreen()) win.setFullScreen(false)
   })
@@ -112,4 +117,5 @@ app.whenReady().then(() => {
   })
 })
 
+app.on('before-quit', () => flushState())
 app.on('window-all-closed', () => app.quit())

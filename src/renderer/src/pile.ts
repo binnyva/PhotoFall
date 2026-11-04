@@ -22,8 +22,8 @@ export class Pile {
 
   constructor(private readonly table: HTMLElement) {}
 
-  /** Drops a card onto the pile and resolves when it has landed. */
-  drop(media: LoadedMedia): { card: HTMLDivElement; landed: Promise<void> } {
+  /** Drops a card onto the pile. With `animate: false` it is placed at once (used for the resume pile). */
+  drop(media: LoadedMedia, animate = true): { card: HTMLDivElement; landed: Promise<void> } {
     const W = window.innerWidth
     const H = window.innerHeight
     const photo = photoSize(media.aspect)
@@ -69,10 +69,13 @@ export class Pile {
     this.cards.push(card)
     // A video plays once; when it ends, keep a still of its last frame and free the decoder.
     video?.addEventListener('ended', () => this.freeze(card), { once: true })
+    // Cards laid down without a fall are background: videos among them show a still, not playback.
+    if (!animate && video) this.freeze(card)
 
     // Old cards are removed only after the new one lands: changing the stack mid-fall
     // makes the compositor rebuild its layers, which shows up as flicker.
-    const landed = this.animateFall(el, rect).then(() => {
+    const fall = animate ? this.animateFall(el, rect) : Promise.resolve()
+    const landed = fall.then(() => {
       this.afterLanding()
       this.trim()
     })
@@ -142,6 +145,10 @@ export class Pile {
       if (!old) break
       this.release(old)
     }
+  }
+
+  get size(): number {
+    return this.cards.length
   }
 
   playingVideos(): HTMLVideoElement[] {

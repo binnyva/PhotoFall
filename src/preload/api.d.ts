@@ -6,6 +6,8 @@ export interface PhotoFallApi {
   getPlaylist(rescan?: boolean): Promise<Playlist>
   chooseFolder(): Promise<string | null>
   exitFullscreen(): Promise<void>
+  /** Tells the app which item just fell, so it can resume from it next launch. */
+  reportShown(id: string): void
   onOpenSettings(cb: () => void): () => void
   onTogglePause(cb: () => void): () => void
   onNext(cb: () => void): () => void

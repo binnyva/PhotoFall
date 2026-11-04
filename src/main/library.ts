@@ -3,6 +3,7 @@ import { sortItems } from '@shared/sort'
 import type { MediaItem, MediaKind, Playlist, Settings } from '@shared/types'
 import { flushMetaCache, getMeta, mapLimit } from './metadata'
 import { CONVERT_EXT, scanFolder } from './scan'
+import { getState } from './state'
 
 interface Entry {
   path: string
@@ -41,8 +42,14 @@ async function load(settings: Settings): Promise<MediaItem[]> {
 export async function buildPlaylist(settings: Settings, rescan = false): Promise<Playlist> {
   if (rescan) lastKey = ''
   try {
-    const items = await load(settings)
-    return { folder: settings.sourceFolder, items: sortItems(items, settings.sortBy, settings.sortOrder) }
+    const items = sortItems(await load(settings), settings.sortBy, settings.sortOrder)
+    const last = getState().lastShown
+    const idx = last ? items.findIndex((m) => registry.get(m.id)?.path === last) : -1
+    return {
+      folder: settings.sourceFolder,
+      items,
+      ...(idx >= 0 ? { resumeIndex: idx } : {})
+    }
   } catch (err) {
     return { folder: settings.sourceFolder, items: [], error: (err as Error).message }
   }

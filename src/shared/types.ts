@@ -32,8 +32,12 @@ export interface Playlist {
   items: MediaItem[]
   /** Set when the folder could not be read. */
   error?: string
+  /** Index of the photo shown last time the app ran, when it is still in this folder. */
+  resumeIndex?: number
 }
 
 export const VIDEO_HOLD_SECONDS = 3
 /** Cards kept on the table. Older ones are removed from the page and freed. */
 export const PILE_LIMIT = 20
+/** Cards laid down under the resumed photo at launch, so the table isn't empty. */
+export const RESUME_PILE = 10
